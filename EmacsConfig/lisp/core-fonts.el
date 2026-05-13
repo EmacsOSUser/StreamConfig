@@ -1,5 +1,7 @@
 ;;; core-fonts.el -*- lexical-binding: t; -*-
 
+;;; TODO: Fix so that the font increases only in the current buffer.
+
 (defun my/apply-font (font)
   (set-face-attribute 'default nil :family font :height 110))
 

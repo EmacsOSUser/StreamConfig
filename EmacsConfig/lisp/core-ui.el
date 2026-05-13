@@ -27,6 +27,17 @@
   (global-set-key (kbd "C-c <left>")  #'my/shrink-window-horizontally)
   (global-set-key (kbd "C-c <right>") #'my/enlarge-window-horizontally))
 
+;; (use-package popwin
+;;   :ensure t
+;;   :config
+;;   (popwin-mode 1))
+;; 
+;; (setq popwin:special-display-config nil)
+;; (setq popwin:popup-window-position 'bottom)
+;; (setq popwin:popup-window-height 0.3)
+;; (setq popwin:reuse-window t)
+;; (setq popwin:close-popup-window-timer-interval nil)
+
 ;; Relative line numbers
 (defun my/relative-line-numbers ()
   (unless (or (minibufferp)
@@ -100,9 +111,18 @@
           (switch-to-buffer (get-buffer-create (plist-get my/layout-buffers :bottom-right)))
 
           ;; Start shell in bottom-right
-          (shell (current-buffer))))))
+          (ansi-term "/usr/bin/env bash")))))
   ;; Go back to left buffer at the end
   (select-window (get-buffer-window (plist-get my/layout-buffers :left))))
+
+(defun my/start-term ()
+  "Start a terminal in the current directory."
+  (interactive)
+  (let ((proc (make-term-process "my-term" nil default-directory "/usr/bin/env bash")))
+    (set-process-query-on-exit-flag proc nil)
+    (with-current-buffer (process-buffer proc)
+      (term-mode)
+      (term-char-mode))))
 
 ;; Jump to buffer functions
 (defun my/jump-to-left-buffer ()
@@ -120,10 +140,43 @@
   (let ((buf (get-buffer (plist-get my/layout-buffers :bottom-right))))
     (when buf (switch-to-buffer buf))))
 
+;; Highlight annoying white space
+;; Define a light green face for trailing whitespace
+(defface my/trailing-whitespace-face
+  '((t (:background "#4a5d23" :foreground "white")))
+  "Face for highlighting trailing whitespace.")
+
+;; Configure whitespace-mode
+(setq whitespace-style
+      '(face                    ; Highlight trailing whitespace with face
+        tabs                    ; Show tabs
+        spaces                  ; Show spaces
+        trailing                ; Mark trailing whitespace
+        empty-line              ; Highlight blank lines with spaces
+        empty-line-before       ; Blank lines before
+        space-mark              ; Show space markers
+        tab-mark))              ; Show tab markers
+
+(setq whitespace-face 'default)
+(setq whitespace-trailing-face 'my/trailing-whitespace-face)
+(setq whitespace-empty-line-face 'my/trailing-whitespace-face)
+
+;; Try to keep popups in the same window
+(setq display-buffer-base-action '(display-buffer-same-window))
+;; (setq display-buffer-alist
+;;       '((".*"
+;;          (display-buffer-reuse-window
+;;           display-buffer-same-window)
+;;          (reusable-frames . t))))
+
+;; Enable whitespace-mode globally
+(global-whitespace-mode 1)
+(setq column-number-mode t)
+
 (global-set-key (kbd "C-c 1") #'my/jump-to-left-buffer)
 (global-set-key (kbd "C-c 2") #'my/jump-to-top-right-buffer)
 (global-set-key (kbd "C-c 3") #'my/jump-to-bottom-right-buffer)
-(global-set-key (kbd "C-c t") #'my/toggle-tool-and-menu-bars)
+(global-set-key (kbd "C-c C-t") #'my/toggle-tool-and-menu-bars)
 (global-set-key (kbd "C-c l") #'my/setup-custom-layout)
 
 ;; Set an after load hook to setup the layout

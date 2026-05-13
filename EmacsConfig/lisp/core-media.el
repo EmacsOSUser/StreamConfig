@@ -1,5 +1,8 @@
 ;;; core-media.el -*- lexical-binding: t; -*-
 
+;;; TODO:
+;;   Combine core-media, core-mpv, and core-ffmpeg
+
 (use-package mpv
   :commands (mpv-play)
   :custom
